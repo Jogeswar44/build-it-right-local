@@ -4,9 +4,9 @@ import { Search, ShoppingCart, Star, Plus, Minus, AlertTriangle } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { VegBadge } from "@/components/StatusBadge";
-import { useCartStore } from "@/store";
+import { useCartStore, useAuthStore } from "@/store";
 import { mockMenuItems } from "@/data/mock";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { MenuCategory, MenuItem } from "@/types";
 
 const categories: { label: string; value: MenuCategory | "ALL" }[] = [
@@ -83,6 +83,13 @@ export default function MenuPage() {
   const [category, setCategory] = useState<MenuCategory | "ALL">("ALL");
   const [vegOnly, setVegOnly] = useState(false);
   const itemCount = useCartStore((s) => s.itemCount());
+  const logout = useAuthStore((s) => s.logout);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const filtered = mockMenuItems.filter((item) => {
     if (category !== "ALL" && item.category !== category) return false;
@@ -109,6 +116,9 @@ export default function MenuPage() {
                 )}
               </Button>
             </Link>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
+              Log Out
+            </Button>
           </div>
         </div>
       </header>

@@ -2,12 +2,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCartStore } from "@/store";
+import { useCartStore, useAuthStore } from "@/store";
 import { VegBadge } from "@/components/StatusBadge";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, updateNote, clearCart, subtotal, tax, total } = useCartStore();
+  const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   if (items.length === 0) {
     return (
@@ -28,7 +34,12 @@ export default function CartPage() {
             <ArrowLeft className="h-4 w-4" /> Menu
           </Link>
           <h1 className="font-display font-bold text-foreground">Cart</h1>
-          <button onClick={clearCart} className="text-sm text-destructive hover:underline">Clear</button>
+          <div className="flex items-center gap-4">
+            <button onClick={clearCart} className="text-sm text-destructive hover:underline">Clear</button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive text-sm px-2">
+              Log Out
+            </Button>
+          </div>
         </div>
       </header>
 

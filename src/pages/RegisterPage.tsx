@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuthStore } from "@/store";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", rollNumber: "", department: "", yearOfStudy: "", password: "" });
@@ -14,10 +15,33 @@ export default function RegisterPage() {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newUser = {
+      id: `usr-${Date.now()}`,
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      rollNumber: form.rollNumber,
+      department: form.department,
+      yearOfStudy: parseInt(form.yearOfStudy) || 1,
+      password: form.password,
+    };
+
+    const storedUsers = JSON.parse(localStorage.getItem("ccms_users") || "[]");
+    const userExists = storedUsers.find((u: any) => u.email === form.email);
+    
+    if (userExists) {
+      toast.error("User with this email already exists!");
+      return;
+    }
+
+    localStorage.setItem("ccms_users", JSON.stringify([...storedUsers, newUser]));
+
     setUser({
-      id: "usr-new", name: form.name, email: form.email, phone: form.phone,
-      role: "STUDENT", rollNumber: form.rollNumber, department: form.department, yearOfStudy: parseInt(form.yearOfStudy),
+      id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone,
+      role: "STUDENT", rollNumber: newUser.rollNumber, department: newUser.department, yearOfStudy: newUser.yearOfStudy,
     });
+    toast.success("Welcome Student");
     navigate("/menu");
   };
 

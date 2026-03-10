@@ -3,6 +3,8 @@ import { ArrowLeft, Clock } from "lucide-react";
 import { StatusBadge, VegBadge } from "@/components/StatusBadge";
 import { mockOrders } from "@/data/mock";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store";
+import { useNavigate } from "react-router-dom";
 
 const steps = ["PENDING", "PREPARING", "READY", "COLLECTED"] as const;
 
@@ -21,6 +23,13 @@ function OrderStepper({ status }: { status: string }) {
 
 export default function TrackOrderPage() {
   const myOrders = mockOrders.filter((o) => o.status !== "COLLECTED" && o.status !== "CANCELLED");
+  const logout = useAuthStore((s) => s.logout);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,7 +39,9 @@ export default function TrackOrderPage() {
             <ArrowLeft className="h-4 w-4" /> Menu
           </Link>
           <h1 className="font-display font-bold text-foreground">My Orders</h1>
-          <div />
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive px-2">
+            Log Out
+          </Button>
         </div>
       </header>
 

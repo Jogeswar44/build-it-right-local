@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Clock, ChefHat, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Clock, ChefHat, AlertTriangle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, VegBadge } from "@/components/StatusBadge";
 import { mockOrders, mockMenuItems } from "@/data/mock";
+import { useAuthStore } from "@/store";
 import type { Order, OrderStatus } from "@/types";
 
 const columns: { status: OrderStatus; label: string; icon: React.ReactNode }[] = [
@@ -53,6 +54,19 @@ function OrderTicket({ order, onUpdateStatus }: { order: Order; onUpdateStatus: 
 
 export default function KitchenDashboard() {
   const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== "KITCHEN") {
+      navigate("/login");
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const updateStatus = (id: string, status: OrderStatus) => {
     setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status } : o));
@@ -74,6 +88,9 @@ export default function KitchenDashboard() {
                 <AlertTriangle className="h-3 w-3" /> {lowStockItems.length} low stock
               </div>
             )}
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-8 w-8 ml-2">
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>

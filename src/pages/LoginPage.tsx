@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,11 +15,45 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login
+
+    if (email === "admin@ccms.edu" && password === "admin123") {
+      setUser({
+        id: "usr-admin", name: "Admin User", email, phone: "0000000000",
+        role: "ADMIN", rollNumber: "", department: "", yearOfStudy: 0,
+      });
+      toast.success("Welcome Admin");
+      navigate("/admin");
+      return;
+    }
+
+    if (email === "kitchen@ccms.edu" && password === "kitchen123") {
+      setUser({
+        id: "usr-kitchen", name: "Kitchen Staff", email, phone: "0000000000",
+        role: "KITCHEN", rollNumber: "", department: "", yearOfStudy: 0,
+      });
+      toast.success("Welcome Kitchen");
+      navigate("/kitchen");
+      return;
+    }
+
+    const storedUsers = JSON.parse(localStorage.getItem("ccms_users") || "[]");
+    const foundUser = storedUsers.find((u: any) => u.email === email);
+
+    if (!foundUser) {
+      toast.error("User not found. Please register.");
+      return;
+    }
+
+    if (foundUser.password !== password) {
+      toast.error("Invalid credentials.");
+      return;
+    }
+
     setUser({
-      id: "usr-1", name: "Rahul Sharma", email, phone: "9876543210",
-      role: "STUDENT", rollNumber: "CS2024001", department: "Computer Science", yearOfStudy: 2,
+      id: foundUser.id || "usr-1", name: foundUser.name, email: foundUser.email, phone: foundUser.phone,
+      role: "STUDENT", rollNumber: foundUser.rollNumber, department: foundUser.department, yearOfStudy: foundUser.yearOfStudy,
     });
+    toast.success("Welcome Student");
     navigate("/menu");
   };
 

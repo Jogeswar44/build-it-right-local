@@ -1,6 +1,9 @@
-import { Link } from "react-router-dom";
-import { BarChart3, ShoppingBag, Users, UtensilsCrossed, Clock, TrendingUp, AlertTriangle, Settings } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { BarChart3, ShoppingBag, Users, UtensilsCrossed, Clock, TrendingUp, AlertTriangle, Settings, LogOut } from "lucide-react";
 import { mockOrders, mockMenuItems } from "@/data/mock";
+import { useAuthStore } from "@/store";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 const stats = [
   { label: "Today's Revenue", value: "₹12,450", icon: TrendingUp, trend: "+12%" },
@@ -12,6 +15,20 @@ const stats = [
 const recentOrders = mockOrders.slice(0, 5);
 
 export default function AdminDashboard() {
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== "ADMIN") {
+      navigate("/login");
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const lowStock = mockMenuItems.filter((i) => i.stockQty <= i.lowStockThreshold && i.isAvailable);
 
   return (
@@ -28,6 +45,9 @@ export default function AdminDashboard() {
             <Link to="/admin" className="text-muted-foreground hover:text-foreground">Staff</Link>
             <Link to="/admin" className="text-muted-foreground hover:text-foreground">Orders</Link>
             <Settings className="h-4 w-4 text-muted-foreground" />
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-8 w-8 ml-2">
+              <LogOut className="h-4 w-4" />
+            </Button>
           </nav>
         </div>
       </header>
