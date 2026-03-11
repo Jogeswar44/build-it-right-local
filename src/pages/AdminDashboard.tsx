@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BarChart3, ShoppingBag, Users, UtensilsCrossed, Clock, TrendingUp, AlertTriangle, Settings, LogOut } from "lucide-react";
 import { mockOrders, mockMenuItems } from "@/data/mock";
 import { useAuthStore } from "@/store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -18,16 +18,39 @@ const recentOrders = mockOrders.slice(0, 5);
 export default function AdminDashboard() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [kitchenStaff, setKitchenStaff] = useState<any[]>([]);
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== "ADMIN") {
       navigate("/login");
+      return;
     }
+    const storedUsers = JSON.parse(localStorage.getItem("ccms_users") || "[]");
+    setKitchenStaff(storedUsers.filter((u: any) => u.role === "KITCHEN"));
   }, [isAuthenticated, user, navigate]);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const generateKitchenId = () => {
+    const newId = String(Math.floor(1000000 + Math.random() * 9000000));
+    const newUser = {
+      id: newId,
+      name: `Kitchen Staff #${newId.slice(-3)}`,
+      email: `kitchen${newId}@ccms.edu`,
+      phone: "0000000000",
+      role: "KITCHEN",
+      password: "N/A"
+    };
+    
+    const storedUsers = JSON.parse(localStorage.getItem("ccms_users") || "[]");
+    const updatedUsers = [...storedUsers, newUser];
+    localStorage.setItem("ccms_users", JSON.stringify(updatedUsers));
+    
+    setKitchenStaff(updatedUsers.filter((u: any) => u.role === "KITCHEN"));
+    toast.success(`Generated new Kitchen Access ID: ${newId}`);
   };
 
   const lowStock = mockMenuItems.filter((i) => i.stockQty <= i.lowStockThreshold && i.isAvailable);
@@ -116,6 +139,38 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">All items well stocked</p>
+            )}
+          </div>
+
+          {/* Kitchen Staff Access Management */}
+          <div className="rounded-xl border border-border bg-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" />
+                <h2 className="font-display font-bold text-foreground">Kitchen Staff</h2>
+              </div>
+              <Button size="sm" onClick={generateKitchenId}>+ Generate ID</Button>
+            </div>
+            
+            {kitchenStaff.length > 0 ? (
+              <div className="space-y-3 max-h-48 overflow-y-auto">
+                {kitchenStaff.map((staff) => (
+                  <div key={staff.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{staff.name}</p>
+                      <p className="text-xs text-muted-foreground">Role: KITCHEN</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-0.5">Access ID</p>
+                      <span className="text-sm font-mono font-bold bg-muted px-2 py-1 rounded">
+                        {staff.id}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No kitchen staff IDs generated yet.</p>
             )}
           </div>
         </div>

@@ -8,23 +8,22 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function KitchenLoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [accessId, setAccessId] = useState("");
   const navigate = useNavigate();
   const setUser = useAuthStore((s) => s.setUser);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (accessId.length !== 7) {
+      toast.error("Access ID must be exactly 7 digits.");
+      return;
+    }
+
     const storedUsers = JSON.parse(localStorage.getItem("ccms_users") || "[]");
-    const foundUser = storedUsers.find((u: any) => u.email === email && u.role === "KITCHEN");
+    const foundUser = storedUsers.find((u: any) => u.id === accessId && u.role === "KITCHEN");
 
     if (foundUser) {
-      if (foundUser.password !== password) {
-        toast.error("Invalid credentials.");
-        return;
-      }
-
       setUser({
         id: foundUser.id,
         name: foundUser.name,
@@ -41,17 +40,18 @@ export default function KitchenLoginPage() {
       return;
     }
 
-    if (email === "kitchen@ccms.edu" && password === "kitchen123") {
+    // Default hardcoded simple fallback if needed
+    if (accessId === "1234567") {
       setUser({
-        id: "usr-kitchen", name: "Kitchen Staff", email, phone: "0000000000",
+        id: "usr-kitchen", name: "Kitchen Staff", email: "kitchen@ccms.edu", phone: "0000000000",
         role: "KITCHEN", rollNumber: "", department: "", yearOfStudy: 0,
       });
-      toast.success("Welcome Kitchen");
+      toast.success("Welcome Kitchen (Fallback Account)");
       navigate("/kitchen");
       return;
     }
 
-    toast.error("Kitchen user not found. Please contact administration.");
+    toast.error("Invalid Access ID. Please ask an Admin to generate one.");
   };
 
   return (
@@ -63,23 +63,24 @@ export default function KitchenLoginPage() {
         <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-display font-bold text-foreground">Kitchen Login</h1>
-            <p className="text-sm text-muted-foreground mt-1">Access the kitchen order management panel</p>
+            <p className="text-sm text-muted-foreground mt-1">Enter your 7-digit Access ID</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="kitchen@ccms.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Label htmlFor="accessId">Access ID</Label>
+              <Input 
+                id="accessId" 
+                type="text" 
+                placeholder="e.g. 7654321" 
+                maxLength={7}
+                value={accessId} 
+                onChange={(e) => setAccessId(e.target.value.replace(/\D/g, ''))} 
+                required 
+                className="font-mono text-center tracking-widest text-lg"
+              />
             </div>
             <Button type="submit" className="w-full" size="lg">Sign In</Button>
           </form>
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            Don't have a kitchen account?{" "}
-            <Link to="/kitchen/register" className="text-primary font-medium hover:underline">Register Here</Link>
-          </p>
         </div>
       </div>
     </div>

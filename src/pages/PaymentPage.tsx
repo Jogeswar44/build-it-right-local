@@ -14,7 +14,7 @@ export default function PaymentPage() {
   const { subtotal, tax, total, clearCart, items } = useCartStore();
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-  const tokenNumber = `CNT-20260310-${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`;
+  const [tokenNumber] = useState(`CNT-20260311-${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`);
 
   useEffect(() => {
     if (step !== "otp" || timer <= 0) return;

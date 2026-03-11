@@ -9,7 +9,6 @@ import RegisterPage from "./pages/RegisterPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminRegisterPage from "./pages/AdminRegisterPage";
 import KitchenLoginPage from "./pages/KitchenLoginPage";
-import KitchenRegisterPage from "./pages/KitchenRegisterPage";
 import MenuPage from "./pages/MenuPage";
 import CartPage from "./pages/CartPage";
 import PaymentPage from "./pages/PaymentPage";
@@ -34,7 +33,6 @@ const App = () => (
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin/register" element={<AdminRegisterPage />} />
           <Route path="/kitchen/login" element={<KitchenLoginPage />} />
-          <Route path="/kitchen/register" element={<KitchenRegisterPage />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/payment" element={<PaymentPage />} />
