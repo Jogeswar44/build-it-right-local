@@ -7,7 +7,7 @@ import { useAuthStore } from "@/store";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     const storedUsers = JSON.parse(localStorage.getItem("ccms_users") || "[]");
-    const foundUser = storedUsers.find((u: any) => u.email === email && u.role === "STUDENT");
+    const foundUser = storedUsers.find((u: any) => u.email === email && u.role === "ADMIN");
 
     if (foundUser) {
       if (foundUser.password !== password) {
@@ -30,18 +30,29 @@ export default function LoginPage() {
         name: foundUser.name,
         email: foundUser.email,
         phone: foundUser.phone,
-        role: "STUDENT",
-        rollNumber: foundUser.rollNumber || "",
-        department: foundUser.department || "",
-        yearOfStudy: foundUser.yearOfStudy || 0,
+        role: "ADMIN",
+        rollNumber: "",
+        department: "",
+        yearOfStudy: 0,
       });
 
-      toast.success("Welcome Student");
-      navigate("/menu");
+      toast.success("Welcome Admin");
+      navigate("/admin");
       return;
     }
 
-    toast.error("Student user not found. Please register.");
+    // Default Fallbacks
+    if (email === "admin@ccms.edu" && password === "admin123") {
+      setUser({
+        id: "usr-admin", name: "Admin User", email, phone: "0000000000",
+        role: "ADMIN", rollNumber: "", department: "", yearOfStudy: 0,
+      });
+      toast.success("Welcome Admin");
+      navigate("/admin");
+      return;
+    }
+
+    toast.error("Admin user not found. Please contact support.");
   };
 
   return (
@@ -52,13 +63,13 @@ export default function LoginPage() {
         </Link>
         <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-display font-bold text-foreground">Student Login</h1>
-            <p className="text-sm text-muted-foreground mt-1">Login to your CCMS account</p>
+            <h1 className="text-2xl font-display font-bold text-foreground">Admin Login</h1>
+            <p className="text-sm text-muted-foreground mt-1">Access the CCMS administration panel</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@college.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input id="email" type="email" placeholder="admin@ccms.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -67,8 +78,8 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" size="lg">Sign In</Button>
           </form>
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Don't have an account?{" "}
-            <Link to="/register" className="text-primary font-medium hover:underline">Register Here</Link>
+            Don't have an admin account?{" "}
+            <Link to="/admin/register" className="text-primary font-medium hover:underline">Register Here</Link>
           </p>
         </div>
       </div>

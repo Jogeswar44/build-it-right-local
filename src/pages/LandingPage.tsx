@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 
 const roles = [
   { icon: GraduationCap, label: "Student", desc: "Browse menu, order food & track delivery", path: "/login", color: "from-orange-500 to-amber-400" },
-  { icon: ChefHat, label: "Kitchen Staff", desc: "Manage orders & update preparation status", path: "/kitchen", color: "from-emerald-500 to-green-400" },
-  { icon: Settings, label: "Admin", desc: "Manage menu, staff, analytics & settings", path: "/admin", color: "from-blue-500 to-indigo-400" },
+  { icon: ChefHat, label: "Kitchen Staff", desc: "Manage orders & update preparation status", path: "/kitchen/login", color: "from-emerald-500 to-green-400" },
+  { icon: Settings, label: "Admin", desc: "Manage menu, staff, analytics & settings", path: "/admin/login", color: "from-blue-500 to-indigo-400" },
   { icon: Monitor, label: "Token Display", desc: "Public screen showing ready orders", path: "/display", color: "from-violet-500 to-purple-400" },
 ];
 

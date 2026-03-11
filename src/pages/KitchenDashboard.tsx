@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Clock, ChefHat, AlertTriangle, LogOut } from "lucide-react";
+import { Clock, ChefHat, AlertTriangle, LogOut, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, VegBadge } from "@/components/StatusBadge";
 import { mockOrders, mockMenuItems } from "@/data/mock";
@@ -11,6 +11,7 @@ const columns: { status: OrderStatus; label: string; icon: React.ReactNode }[] =
   { status: "PENDING", label: "New Orders", icon: <Clock className="h-4 w-4" /> },
   { status: "PREPARING", label: "Preparing", icon: <ChefHat className="h-4 w-4" /> },
   { status: "READY", label: "Ready", icon: <span className="text-base">✅</span> },
+  { status: "COLLECTED", label: "Completed", icon: <CheckCircle className="h-4 w-4" /> },
 ];
 
 function OrderTicket({ order, onUpdateStatus }: { order: Order; onUpdateStatus: (id: string, status: OrderStatus) => void }) {
@@ -53,14 +54,26 @@ function OrderTicket({ order, onUpdateStatus }: { order: Order; onUpdateStatus: 
 }
 
 export default function KitchenDashboard() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const { user, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== "KITCHEN") {
       navigate("/login");
+      return;
     }
+    
+    // Load orders from localStorage
+    const storedOrders = JSON.parse(localStorage.getItem("ccms_orders") || "[]");
+    
+    // Convert string dates back to Date objects
+    const parsedOrders = storedOrders.map((o: any) => ({
+      ...o,
+      createdAt: new Date(o.createdAt)
+    }));
+    
+    setOrders(parsedOrders.length > 0 ? parsedOrders : mockOrders.map(o => ({...o, isMock: true})));
   }, [isAuthenticated, user, navigate]);
 
   const handleLogout = () => {
@@ -69,7 +82,19 @@ export default function KitchenDashboard() {
   };
 
   const updateStatus = (id: string, status: OrderStatus) => {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status } : o));
+    setOrders((prev) => {
+      const updated = prev.map((o) => o.id === id ? { ...o, status } : o);
+      
+      // Save non-mock orders back to localStorage
+      const realOrders = updated.filter((o: any) => !o.isMock);
+      const ordersToSave = realOrders.map(o => ({
+        ...o,
+        createdAt: o.createdAt.toISOString()
+      }));
+      
+      localStorage.setItem("ccms_orders", JSON.stringify(ordersToSave));
+      return updated;
+    });
   };
 
   const lowStockItems = mockMenuItems.filter((i) => i.stockQty <= i.lowStockThreshold && i.isAvailable);
@@ -95,8 +120,8 @@ export default function KitchenDashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <main className="max-w-7xl mx-auto px-4 py-6 overflow-x-auto">
+        <div className="flex flex-col md:grid md:grid-cols-4 gap-6 min-w-[800px]">
           {columns.map(({ status, label, icon }) => {
             const col = orders.filter((o) => o.status === status);
             return (

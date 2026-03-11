@@ -7,7 +7,7 @@ import { useAuthStore } from "@/store";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+export default function KitchenLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     const storedUsers = JSON.parse(localStorage.getItem("ccms_users") || "[]");
-    const foundUser = storedUsers.find((u: any) => u.email === email && u.role === "STUDENT");
+    const foundUser = storedUsers.find((u: any) => u.email === email && u.role === "KITCHEN");
 
     if (foundUser) {
       if (foundUser.password !== password) {
@@ -30,18 +30,28 @@ export default function LoginPage() {
         name: foundUser.name,
         email: foundUser.email,
         phone: foundUser.phone,
-        role: "STUDENT",
-        rollNumber: foundUser.rollNumber || "",
-        department: foundUser.department || "",
-        yearOfStudy: foundUser.yearOfStudy || 0,
+        role: "KITCHEN",
+        rollNumber: "",
+        department: "",
+        yearOfStudy: 0,
       });
 
-      toast.success("Welcome Student");
-      navigate("/menu");
+      toast.success("Welcome Kitchen Staff");
+      navigate("/kitchen");
       return;
     }
 
-    toast.error("Student user not found. Please register.");
+    if (email === "kitchen@ccms.edu" && password === "kitchen123") {
+      setUser({
+        id: "usr-kitchen", name: "Kitchen Staff", email, phone: "0000000000",
+        role: "KITCHEN", rollNumber: "", department: "", yearOfStudy: 0,
+      });
+      toast.success("Welcome Kitchen");
+      navigate("/kitchen");
+      return;
+    }
+
+    toast.error("Kitchen user not found. Please contact administration.");
   };
 
   return (
@@ -52,13 +62,13 @@ export default function LoginPage() {
         </Link>
         <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-display font-bold text-foreground">Student Login</h1>
-            <p className="text-sm text-muted-foreground mt-1">Login to your CCMS account</p>
+            <h1 className="text-2xl font-display font-bold text-foreground">Kitchen Login</h1>
+            <p className="text-sm text-muted-foreground mt-1">Access the kitchen order management panel</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@college.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input id="email" type="email" placeholder="kitchen@ccms.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -67,8 +77,8 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" size="lg">Sign In</Button>
           </form>
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Don't have an account?{" "}
-            <Link to="/register" className="text-primary font-medium hover:underline">Register Here</Link>
+            Don't have a kitchen account?{" "}
+            <Link to="/kitchen/register" className="text-primary font-medium hover:underline">Register Here</Link>
           </p>
         </div>
       </div>

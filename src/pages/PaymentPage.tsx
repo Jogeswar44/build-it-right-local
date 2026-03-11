@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Mail, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/store";
+import { useCartStore, useAuthStore } from "@/store";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { toast } from "sonner";
 
 export default function PaymentPage() {
   const [step, setStep] = useState<"review" | "otp" | "success">("review");
@@ -11,6 +12,7 @@ export default function PaymentPage() {
   const [timer, setTimer] = useState(180);
   const [sending, setSending] = useState(false);
   const { subtotal, tax, total, clearCart, items } = useCartStore();
+  const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
   const tokenNumber = `CNT-20260310-${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`;
 
@@ -22,11 +24,32 @@ export default function PaymentPage() {
 
   const handleSendOtp = () => {
     setSending(true);
-    setTimeout(() => { setSending(false); setStep("otp"); setTimer(180); }, 1500);
+    setTimeout(() => { 
+      setSending(false); 
+      setStep("otp"); 
+      setTimer(180); 
+      toast.success("Mock OTP '123456' sent to your email!");
+    }, 1500);
   };
 
   const handleVerify = () => {
     if (otp.length === 6) {
+      if (user) {
+        const newOrder = {
+          id: `ord-${Date.now()}`,
+          studentId: user.id || "unknown",
+          studentName: user.name || "Unknown Student",
+          tokenNumber: tokenNumber,
+          items: [...items],
+          status: "PENDING",
+          total: total(),
+          createdAt: new Date().toISOString(),
+        };
+
+        const existingOrders = JSON.parse(localStorage.getItem("ccms_orders") || "[]");
+        localStorage.setItem("ccms_orders", JSON.stringify([...existingOrders, newOrder]));
+      }
+
       setStep("success");
       clearCart();
     }

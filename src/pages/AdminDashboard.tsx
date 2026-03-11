@@ -4,6 +4,7 @@ import { mockOrders, mockMenuItems } from "@/data/mock";
 import { useAuthStore } from "@/store";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const stats = [
   { label: "Today's Revenue", value: "₹12,450", icon: TrendingUp, trend: "+12%" },
@@ -41,10 +42,10 @@ export default function AdminDashboard() {
           </div>
           <nav className="flex items-center gap-4 text-sm">
             <Link to="/admin" className="text-foreground font-medium">Dashboard</Link>
-            <Link to="/admin" className="text-muted-foreground hover:text-foreground">Menu</Link>
-            <Link to="/admin" className="text-muted-foreground hover:text-foreground">Staff</Link>
-            <Link to="/admin" className="text-muted-foreground hover:text-foreground">Orders</Link>
-            <Settings className="h-4 w-4 text-muted-foreground" />
+            <button onClick={() => toast.info("Menu management coming soon!")} className="text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer">Menu</button>
+            <button onClick={() => toast.info("Staff management coming soon!")} className="text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer">Staff</button>
+            <button onClick={() => toast.info("Orders history coming soon!")} className="text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer">Orders</button>
+            <Settings className="h-4 w-4 text-muted-foreground cursor-pointer" onClick={() => toast.info("Settings coming soon!")} />
             <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-8 w-8 ml-2">
               <LogOut className="h-4 w-4" />
             </Button>

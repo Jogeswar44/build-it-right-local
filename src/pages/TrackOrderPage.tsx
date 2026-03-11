@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Clock } from "lucide-react";
 import { StatusBadge, VegBadge } from "@/components/StatusBadge";
-import { mockOrders } from "@/data/mock";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store";
 import { useNavigate } from "react-router-dom";
+import type { Order } from "@/types";
+import { useState, useEffect } from "react";
 
 const steps = ["PENDING", "PREPARING", "READY", "COLLECTED"] as const;
 
@@ -22,9 +23,34 @@ function OrderStepper({ status }: { status: string }) {
 }
 
 export default function TrackOrderPage() {
-  const myOrders = mockOrders.filter((o) => o.status !== "COLLECTED" && o.status !== "CANCELLED");
-  const logout = useAuthStore((s) => s.logout);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const loadOrders = () => {
+      const storedOrders = JSON.parse(localStorage.getItem("ccms_orders") || "[]");
+      const userOrders = storedOrders
+        .filter((o: any) => o.studentId === user.id)
+        .map((o: any) => ({ ...o, createdAt: new Date(o.createdAt) }));
+      
+      setOrders(userOrders);
+    };
+
+    // Initial load
+    loadOrders();
+
+    // Poll for updates (simulate real-time)
+    const interval = setInterval(loadOrders, 2000);
+    return () => clearInterval(interval);
+  }, [user, navigate]);
+
+  const myOrders = orders.filter((o) => o.status !== "COLLECTED" && o.status !== "CANCELLED");
 
   const handleLogout = () => {
     logout();
